@@ -6,7 +6,7 @@ public class Main {
 
     public static void main(String[] args) {
         Board board = new Board();
-        Computer computer = new Computer(board.getBoard());
+        Computer computer = new Computer(false);
 
         board.display();
         while (true) {
