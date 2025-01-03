@@ -6,7 +6,7 @@ public class Main {
 
     public static void main(String[] args) {
         Board board = new Board();
-        Computer computer = new Computer(false);
+        Computer computer = new Computer(Computer.Difficulty.Hard);
 
         board.display();
         while (true) {
@@ -18,8 +18,29 @@ public class Main {
                 }
             }
 
-            board.display();
+            if (board.playerWon()) {
+                board.display();
+                if (currentPlayer == Player.X) {
+                    System.out.println("Player X won!");
+                } else {
+                    System.out.println("Player O won!");
+                }
+                break;
+            }
 
+            if (board.isFull()) {
+                board.display();
+                System.out.println("Its a draw!");
+                break;
+            }
+
+            computer.updateBoard(board.getBoard());
+            int location = computer.makeMove() + 1;
+            computer.updateBoard(board.getBoard());
+
+            board.placePiece(location, Tile.O);
+            computer.updateBoard(board.getBoard());
+            board.display();
             if (board.playerWon()) {
                 if (currentPlayer == Player.X) {
                     System.out.println("Player X won!");
@@ -33,8 +54,6 @@ public class Main {
                 System.out.println("Its a draw!");
                 break;
             }
-
-            currentPlayer = currentPlayer == Player.X ? Player.O : Player.X;
         }
     }
 
