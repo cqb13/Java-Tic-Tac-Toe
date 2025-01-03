@@ -33,8 +33,8 @@ public class Computer {
 
     public int makeMove() {
         return switch (this.difficulty) {
-            case Hard -> miniMax(Player.O, 0).getLocation();
-            case Medium -> randomMove();
+            case Hard -> miniMax(Player.O).getLocation();
+            case Medium -> mediumDifficultyComputer();
             case Easy -> randomMove();
         };
     }
@@ -45,7 +45,15 @@ public class Computer {
         return (int)(Math.random() * emptyTiles.size());
     }
 
-    private MiniMaxResult miniMax(Player currentPlayer, int turns) {
+    private int mediumDifficultyComputer() { //TODO: make medium not make best move on first turn but after that always make best move
+        if (Math.random() >= 0.75) {
+            return randomMove();
+        } else {
+            return miniMax(Player.O).getLocation();
+        }
+    }
+
+    private MiniMaxResult miniMax(Player currentPlayer) {
         Player computerPlayer = Player.O;
         Player otherPlayer = currentPlayer == Player.X ? Player.O : Player.X;
 
@@ -72,7 +80,7 @@ public class Computer {
 
         for (Number location : openSquares) {
             this.board[location.intValue()] = currentPlayer == Player.X ? Tile.X : Tile.O;
-            MiniMaxResult miniResult = miniMax(otherPlayer, turns + 1);
+            MiniMaxResult miniResult = miniMax(otherPlayer);
 
             this.board[location.intValue()] = Tile.Empty;
 
