@@ -33,7 +33,7 @@ public class Computer {
 
     public int makeMove() {
         return switch (this.difficulty) {
-            case Hard -> miniMax(Player.O).getLocation();
+            case Hard -> miniMax(Player.O, true, 0).getLocation();
             case Medium -> mediumDifficultyComputer();
             case Easy -> randomMove();
         };
@@ -45,15 +45,26 @@ public class Computer {
         return (int)(Math.random() * emptyTiles.size());
     }
 
-    private int mediumDifficultyComputer() { //TODO: make medium not make best move on first turn but after that always make best move
-        if (Math.random() >= 0.75) {
-            return randomMove();
-        } else {
-            return miniMax(Player.O).getLocation();
+    private int mediumDifficultyComputer() {
+        int openTiles = getEmptyTiles().size();
+
+        // Choose side on first move
+        if (openTiles == 9) {
+            System.out.println("side");
+            int sideChoice = (int) Math.floor(Math.random() * 4);
+            return sideChoice * 2 + 1;
         }
+
+        // Dont take the center on the first move
+        if (openTiles == 8) {
+            System.out.println("not center");
+            return miniMax(Player.O, false, 0).getLocation();
+        }
+
+        return miniMax(Player.O, true, 0).getLocation();
     }
 
-    private MiniMaxResult miniMax(Player currentPlayer) {
+    private MiniMaxResult miniMax(Player currentPlayer, boolean checkCenter, int turn) {
         Player computerPlayer = Player.O;
         Player otherPlayer = currentPlayer == Player.X ? Player.O : Player.X;
 
@@ -78,22 +89,38 @@ public class Computer {
 
         MiniMaxResult bestMove = new MiniMaxResult(-1, currentPlayer == computerPlayer ? Integer.MIN_VALUE : Integer.MAX_VALUE);
 
-        for (Number location : openSquares) {
-            this.board[location.intValue()] = currentPlayer == Player.X ? Tile.X : Tile.O;
-            MiniMaxResult miniResult = miniMax(otherPlayer);
+        int wins = 0;
+        for (int location : openSquares) {
+            if (location == 4 && !checkCenter) {
+                continue;
+            }
 
-            this.board[location.intValue()] = Tile.Empty;
+            this.board[location] = currentPlayer == Player.X ? Tile.X : Tile.O;
+            MiniMaxResult miniResult = miniMax(otherPlayer, true, turn + 1);
+
+            if (miniResult.getScore() < 0 ) {
+                wins += 1;
+            }
+
+            this.board[location] = Tile.Empty;
 
             if (currentPlayer == computerPlayer) {
                 if (miniResult.getScore() > bestMove.getScore()) {
                     bestMove.setScore(miniResult.getScore());
-                    bestMove.setLocation(location.intValue());
+                    bestMove.setLocation(location);
+                    bestMove.setWinningMoves(miniResult.getWinningMoves());
                 }
             } else {
                 if (miniResult.getScore() < bestMove.getScore()) {
                     bestMove.setScore(miniResult.getScore());
-                    bestMove.setLocation(location.intValue());
+                    bestMove.setLocation(location);
+                    bestMove.setWinningMoves(miniResult.getWinningMoves());
                 }
+            }
+
+            if (miniResult.getScore() == bestMove.getScore() && miniResult.getWinningMoves() < bestMove.getWinningMoves()) {
+                bestMove.setWinningMoves(miniResult.getWinningMoves());
+                bestMove.setLocation(miniResult.getLocation());
             }
         }
 

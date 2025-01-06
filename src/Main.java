@@ -1,8 +1,8 @@
 import java.util.Scanner;
 
 public class Main {
-    public static Scanner scanner = new Scanner(System.in);
-    public static Player currentPlayer = Player.X;
+    public static Scanner scanner;
+    public static Player currentPlayer;
 
     public static void main(String[] args) {
         Board board = new Board();
@@ -11,7 +11,7 @@ public class Main {
         boolean computerFirst = false;
         scanner = new Scanner(System.in);
         currentPlayer = Player.X;
-
+        //TODO: Simulation
         System.out.print("Would you like to play against a human (h) or a computer (c)? [h,C]: ");
         String otherPlayer = scanner.next();
 
@@ -42,7 +42,6 @@ public class Main {
 
             board.placePiece(location, Tile.O);
             computer.updateBoard(board.getBoard());
-            board.display();
         }
 
         board.display();
@@ -126,8 +125,16 @@ public class Main {
     }
 
     public static int getInputNumber() {
-        System.out.println("Enter the number seen in a square: ");
-        int value = scanner.nextInt();
+        System.out.print("Enter the number seen in a square: ");
+        String input = scanner.nextLine();
+        int value;
+
+        try {
+            value = Integer.parseInt(input);
+        } catch(Exception e){
+            value = getInputNumber();
+        }
+
         if (value > 0 && value < 10) {
             return value;
         } else {
