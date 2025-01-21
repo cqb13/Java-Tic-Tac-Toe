@@ -1,3 +1,5 @@
+package game.computer;
+
 public class MiniMaxResult {
     private int location;
     private int score;

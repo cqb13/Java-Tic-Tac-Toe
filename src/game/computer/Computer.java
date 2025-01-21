@@ -1,26 +1,32 @@
+package game.computer;
+
+import game.Difficulty;
+import game.Player;
+import game.Tile;
+
 import java.util.ArrayList;
 
 public class Computer {
-    private Difficulty difficulty;
+    private final Difficulty difficulty;
     private Tile[] board;
+    private final Player player;
 
-    public enum Difficulty {
-        Hard,
-        Medium,
-        Easy,
+    public Computer(Difficulty difficulty, Player player) {
+        this.difficulty = difficulty;
+        this.player = player;
+        this.board = new Tile[]{Tile.Empty, Tile.Empty, Tile.Empty, Tile.Empty, Tile.Empty, Tile.Empty, Tile.Empty, Tile.Empty, Tile.Empty};
     }
 
-    public Computer(Difficulty difficulty) {
-        this.difficulty = difficulty;
-        this.board = new Tile[]{Tile.Empty, Tile.Empty, Tile.Empty, Tile.Empty, Tile.Empty, Tile.Empty, Tile.Empty, Tile.Empty, Tile.Empty};
+    public Player getPlayer() {
+        return this.player;
     }
 
     public void updateBoard(Tile[] board) {
         this.board = board;
     }
 
-    private ArrayList<Number> getEmptyTiles() {
-        ArrayList<Number> emptyTiles = new ArrayList<>();
+    private ArrayList<Integer> getEmptyTiles() {
+        ArrayList<Integer> emptyTiles = new ArrayList<>();
 
         for (int i = 0; i < 9; i++) {
             if (this.board[i] == Tile.Empty) {
@@ -33,14 +39,14 @@ public class Computer {
 
     public int makeMove() {
         return switch (this.difficulty) {
-            case Hard -> miniMax(Player.O, true, 0).getLocation();
+            case Hard -> miniMax(this.player, true, 0).getLocation();
             case Medium -> mediumDifficultyComputer();
             case Easy -> randomMove();
         };
     }
 
     private int randomMove() {
-        ArrayList<Number> emptyTiles = getEmptyTiles();
+        ArrayList<Integer> emptyTiles = getEmptyTiles();
 
         return (int)(Math.random() * emptyTiles.size());
     }
@@ -50,33 +56,61 @@ public class Computer {
 
         // Choose side on first move
         if (openTiles == 9) {
-            System.out.println("side");
             int sideChoice = (int) Math.floor(Math.random() * 4);
             return sideChoice * 2 + 1;
         }
 
         // Dont take the center on the first move
         if (openTiles == 8) {
-            System.out.println("not center");
-            return miniMax(Player.O, false, 0).getLocation();
+            return miniMax(this.player, false, 0).getLocation();
+        }
+
+        if(openTiles == 7) {
+            if (this.board[1] == this.player.tile && this.board[7] == Tile.Empty) {
+                return 7;
+            }
+
+            if (this.board[7] == this.player.tile && this.board[1] == Tile.Empty) {
+                return 1;
+            }
+
+            if (this.board[3] == this.player.tile && this.board[5] == Tile.Empty) {
+                return 5;
+            }
+
+            if (this.board[5] == this.player.tile && this.board[3] == Tile.Empty) {
+                return 3;
+            }
+
+            if (this.board[1] == Tile.Empty) {
+                return 1;
+            }
+
+            if (this.board[3] == Tile.Empty) {
+                return 3;
+            }
+
+            if (this.board[5] == Tile.Empty) {
+                return 5;
+            }
         }
 
         return miniMax(Player.O, true, 0).getLocation();
     }
 
     private MiniMaxResult miniMax(Player currentPlayer, boolean checkCenter, int turn) {
-        Player computerPlayer = Player.O;
+        Player computerPlayer = this.player;
         Player otherPlayer = currentPlayer == Player.X ? Player.O : Player.X;
 
-        ArrayList<Number> openSquares = getEmptyTiles();
+        ArrayList<Integer> openSquares = getEmptyTiles();
         MiniMaxResult result = new MiniMaxResult(-1, 0);
 
         // The player won on the last turn
         if (playerWon()) {
             if (currentPlayer == computerPlayer) {
-                result.setScore(-10);
+                result.setScore(-15 + turn);
             } else {
-                result.setScore(10);
+                result.setScore(15 - turn);
             }
 
             return result;
@@ -95,7 +129,7 @@ public class Computer {
                 continue;
             }
 
-            this.board[location] = currentPlayer == Player.X ? Tile.X : Tile.O;
+            this.board[location] = currentPlayer.tile;
             MiniMaxResult miniResult = miniMax(otherPlayer, true, turn + 1);
 
             if (miniResult.getScore() < 0 ) {
@@ -123,7 +157,7 @@ public class Computer {
                 bestMove.setLocation(miniResult.getLocation());
             }
         }
-
+        bestMove.setWinningMoves(wins);
         return bestMove;
     }
 

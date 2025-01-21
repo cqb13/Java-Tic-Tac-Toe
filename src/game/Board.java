@@ -1,3 +1,5 @@
+package game;
+
 public class Board {
     private final Tile[] board;
     private static final String[] xTile = {
@@ -59,14 +61,18 @@ public class Board {
         return emptyTile;
     }
 
-    public boolean placePiece(int location, Tile tile) {
+    public boolean placeTile(int location, Tile tile) {
         int index = location - 1;
-        if (this.board[index] != Tile.Empty) {
+        if (this.board[index] != Tile.Empty && tile != Tile.Empty) {
             return false;
         }
 
         this.board[index] = tile;
         return true;
+    }
+
+    public Tile getTile(int location) {
+        return this.board[location - 1];
     }
 
     public boolean isFull() {
@@ -88,7 +94,7 @@ public class Board {
         }
 
         // Check horizontal
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 9; i += 3) {
             if (this.board[i] == this.board[i + 1] && this.board[i] == this.board[i + 2] && this.board[i] != Tile.Empty) {
                 return true;
             }
