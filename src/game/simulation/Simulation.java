@@ -1,23 +1,28 @@
 package game.simulation;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import game.*;
-import game.computer.Computer;
 
 public class Simulation {
     private final Difficulty computerOneDifficulty;
     private final Difficulty computerTwoDifficulty;
     private final int simulations;
     private final boolean displaySimulations;
-    private final ArrayList<GameStateNode> gameMap;
+    private ArrayList<GameStateNode> gameMap;
 
     public Simulation(Difficulty computerOneDifficulty, Difficulty computerTwoDifficulty, int simulations, boolean displaySimulations) {
         this.computerOneDifficulty = computerOneDifficulty;
         this.computerTwoDifficulty = computerTwoDifficulty;
         this.simulations = simulations;
         this.displaySimulations = displaySimulations;
-        // TODO: if a file does not exist generate it, removes the generate option from main
-        this.gameMap = GameSolver.loadFromFile("gamemap.txt");
+
+        try {
+            this.gameMap = GameSolver.loadFromFile("./gamemap.txt");
+        } catch (RuntimeException e) {
+            this.gameMap = GameSolver.calculateGame();
+            GameSolver.saveToFile(this.gameMap, "./gamemap.txt");
+        }
     }
 
     public ArrayList<SimulationResult> run() {
@@ -27,6 +32,9 @@ public class Simulation {
         int barDone = 0;
         int percentDone = 0;
         int increaseEach = this.simulations / 100;
+        if (increaseEach == 0) {
+            increaseEach = 1;
+        }
         for (int i = 0; i < this.simulations; i++) {
             if(i % increaseEach == 0){
                 System.out.print("\r[" + "#".repeat(barDone) + " ".repeat(20 - barDone) + "] " + percentDone + "%");
@@ -41,7 +49,9 @@ public class Simulation {
 
             int moves = 0;
             while (true) {
-                computerOne.updateBoard(board.getBoard());
+                if (computerOneDifficulty == Difficulty.Medium) {
+                    computerOne.updateBoard(board.getBoard());
+                }
                 int location = computerOne.makeMove(moves) + 1;
                 computerTwo.otherPlayerMove(location - 1, moves == 0);
                 board.placeTile(location, Tile.X);
@@ -59,7 +69,9 @@ public class Simulation {
                     break;
                 }
 
-                computerTwo.updateBoard(board.getBoard());
+                if (computerTwoDifficulty == Difficulty.Medium) {
+                    computerTwo.updateBoard(board.getBoard());
+                }
                 location = computerTwo.makeMove(moves) + 1;
                 computerOne.otherPlayerMove(location - 1, false);
                 board.placeTile(location, Tile.O);
