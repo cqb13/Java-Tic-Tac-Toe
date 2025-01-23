@@ -9,16 +9,20 @@ public class Simulation {
     private final Difficulty computerTwoDifficulty;
     private final int simulations;
     private final boolean displaySimulations;
+    private final ArrayList<GameStateNode> gameMap;
 
     public Simulation(Difficulty computerOneDifficulty, Difficulty computerTwoDifficulty, int simulations, boolean displaySimulations) {
         this.computerOneDifficulty = computerOneDifficulty;
         this.computerTwoDifficulty = computerTwoDifficulty;
         this.simulations = simulations;
         this.displaySimulations = displaySimulations;
+        // TODO: if a file does not exist generate it, removes the generate option from main
+        this.gameMap = GameSolver.loadFromFile("gamemap.txt");
     }
 
     public ArrayList<SimulationResult> run() {
         ArrayList<SimulationResult> simulationData = new ArrayList<>();
+
 
         int barDone = 0;
         int percentDone = 0;
@@ -32,13 +36,14 @@ public class Simulation {
                 }
             }
             Board board = new Board();
-            Computer computerOne = new Computer(this.computerOneDifficulty, Player.X);
-            Computer computerTwo = new Computer(this.computerTwoDifficulty, Player.O);
+            SavedComputer computerOne = new SavedComputer(this.computerOneDifficulty, Player.X, gameMap);
+            SavedComputer computerTwo = new SavedComputer(this.computerTwoDifficulty, Player.O, gameMap);
 
             int moves = 0;
             while (true) {
                 computerOne.updateBoard(board.getBoard());
-                int location = computerOne.makeMove() + 1;
+                int location = computerOne.makeMove(moves == 0) + 1;
+                computerTwo.otherPlayerMove(location - 1, moves == 0);
                 board.placeTile(location, Tile.X);
                 moves++;
                 if (this.displaySimulations) {
@@ -55,7 +60,8 @@ public class Simulation {
                 }
 
                 computerTwo.updateBoard(board.getBoard());
-                location = computerTwo.makeMove() + 1;
+                location = computerTwo.makeMove(false) + 1;
+                computerOne.otherPlayerMove(location - 1, false);
                 board.placeTile(location, Tile.O);
                 moves++;
                 if (board.playerWon()) {
