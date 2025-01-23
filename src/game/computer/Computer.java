@@ -48,7 +48,7 @@ public class Computer {
     private int randomMove() {
         ArrayList<Integer> emptyTiles = getEmptyTiles();
 
-        return (int)(Math.random() * emptyTiles.size());
+        return emptyTiles.get((int)(Math.random() * emptyTiles.size()));
     }
 
     private int mediumDifficultyComputer() {

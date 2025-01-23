@@ -53,12 +53,12 @@ public class SavedComputer {
         return emptyTiles;
     }
 
-    public int makeMove(boolean isFirst) {
+    public int makeMove(int moves) {
+        boolean isFirst = moves == 0;
         int move = switch (this.difficulty) {
             case Hard -> this.hardMove(isFirst);
-            default -> randomMove();
-//            case Medium -> mediumDifficultyComputer();
-//            case Easy -> randomMove();
+            case Medium -> this.mediumMove(moves);
+            case Easy -> randomMove();
         };
         if(isFirst) {
             this.currentNode = this.gameMap.get(move);
@@ -76,14 +76,57 @@ public class SavedComputer {
         }
     }
 
-    private int mediumMove(int mvoes) {
-        return 0;
+    private int mediumMove(int moves) {
+        if(moves == 0) {
+            int sideChoice = (int) Math.floor(Math.random() * 4);
+            return sideChoice * 2 + 1;
+        }
+
+        if(moves == 1) {
+            if(this.currentNode.getMove() == 0) {
+                return 2;
+            } else {
+                return 0;
+            }
+        }
+
+        if(moves == 2) {
+            if (this.board[1] == this.player.tile && this.board[7] == Tile.Empty) {
+                return 7;
+            }
+
+            if (this.board[7] == this.player.tile && this.board[1] == Tile.Empty) {
+                return 1;
+            }
+
+            if (this.board[3] == this.player.tile && this.board[5] == Tile.Empty) {
+                return 5;
+            }
+
+            if (this.board[5] == this.player.tile && this.board[3] == Tile.Empty) {
+                return 3;
+            }
+
+            if (this.board[1] == Tile.Empty) {
+                return 1;
+            }
+
+            if (this.board[3] == Tile.Empty) {
+                return 3;
+            }
+
+            if (this.board[5] == Tile.Empty) {
+                return 5;
+            }
+        }
+
+        return hardMove(false);
     }
 
     private int randomMove() {
-        ArrayList<Integer> emptyTiles = getEmptyTiles();
+        ArrayList<GameStateNode> emptyTiles = this.currentNode.getNextMoves();
 
-        return (int)(Math.random() * emptyTiles.size());
+        return emptyTiles.get((int)(Math.random() * emptyTiles.size())).getMove();
     }
 
 //    private int mediumDifficultyComputer() {

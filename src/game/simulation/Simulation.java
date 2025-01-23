@@ -42,7 +42,7 @@ public class Simulation {
             int moves = 0;
             while (true) {
                 computerOne.updateBoard(board.getBoard());
-                int location = computerOne.makeMove(moves == 0) + 1;
+                int location = computerOne.makeMove(moves) + 1;
                 computerTwo.otherPlayerMove(location - 1, moves == 0);
                 board.placeTile(location, Tile.X);
                 moves++;
@@ -60,7 +60,7 @@ public class Simulation {
                 }
 
                 computerTwo.updateBoard(board.getBoard());
-                location = computerTwo.makeMove(false) + 1;
+                location = computerTwo.makeMove(moves) + 1;
                 computerOne.otherPlayerMove(location - 1, false);
                 board.placeTile(location, Tile.O);
                 moves++;
