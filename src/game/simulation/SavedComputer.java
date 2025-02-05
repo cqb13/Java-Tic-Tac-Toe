@@ -21,6 +21,8 @@ public class SavedComputer {
     }
     
     public void otherPlayerMove(int move, boolean isFirst) {
+        if (this.difficulty == Difficulty.Easy) return;
+
         if(isFirst) {
             currentNode = gameMap.get(move);
         } else {
@@ -39,6 +41,11 @@ public class SavedComputer {
             case Medium -> this.mediumMove(moves);
             case Easy -> randomMove();
         };
+
+        if (this.difficulty == Difficulty.Easy) {
+            return move;
+        }
+
         if(isFirst) {
             this.currentNode = this.gameMap.get(move);
         } else {
@@ -102,9 +109,21 @@ public class SavedComputer {
         return hardMove(false);
     }
 
-    private int randomMove() {
-        ArrayList<GameStateNode> emptyTiles = this.currentNode.getNextMoves();
+    private ArrayList<Integer> getEmptyTiles() {
+        ArrayList<Integer> emptyTiles = new ArrayList<>();
 
-        return emptyTiles.get((int)(Math.random() * emptyTiles.size())).getMove();
+        for (int i = 0; i < 9; i++) {
+            if (this.board[i] == Tile.Empty) {
+                emptyTiles.add(i);
+            }
+        }
+
+        return emptyTiles;
+    }
+
+    private int randomMove() {
+        ArrayList<Integer> emptyTiles = getEmptyTiles();
+
+        return emptyTiles.get((int)(Math.random() * emptyTiles.size()));
     }
 }
